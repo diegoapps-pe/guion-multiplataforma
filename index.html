@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guion Multiplataforma</title>
+<meta name="description" content="Pega tu guion una vez y obtén un hilo para X, bloques para TikTok y Reels, y la descripción de YouTube.">
+<meta name="theme-color" content="#3b82f6">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+:root{
+  --ink:#1e293b; --muted:#64748b; --line:#cbd5e1; --soft:#f8fafc; --card:#ffffff;
+  --accent:#3b82f6; --accent-ink:#1d4ed8; --green:#059669; --red:#dc2626; --warn:#b91c1c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#eef2f7;font-family:"Segoe UI",system-ui,-apple-system,sans-serif;color:var(--ink)}
+.app{max-width:1280px;margin:0 auto;background:#fff;min-height:100vh;padding:36px 44px;display:flex;flex-direction:column;gap:22px}
+header{text-align:center}
+h1{margin:0;font-size:36px;font-weight:800}
+.sub{margin:6px 0 0;font-size:17px;color:var(--muted)}
+.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px}
+.col{display:flex;flex-direction:column;gap:8px;min-width:0}
+.lbl{font-size:15px;font-weight:700}
+textarea{font-family:inherit;color:var(--ink)}
+#guion{width:100%;height:440px;resize:vertical;padding:18px 20px;border:1px solid var(--line);border-radius:12px;background:var(--soft);font-size:16px;line-height:1.6}
+textarea:focus,button:focus-visible{outline:3px solid #93c5fd;outline-offset:1px}
+.count{text-align:right;font-size:13px;font-weight:600;color:var(--muted)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);flex-wrap:nowrap}
+.tab{border:0;background:transparent;color:var(--muted);font-family:inherit;font-size:14px;font-weight:600;padding:10px 8px;flex:1 1 0;min-width:0;text-align:center;line-height:1.2;border-radius:8px 8px 0 0;cursor:pointer;min-height:44px;border-bottom:3px solid transparent}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--accent-ink);background:#fff;border-bottom-color:var(--accent)}
+.panel{height:340px;overflow-y:auto;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--soft);display:flex;flex-direction:column;gap:12px}
+.help{margin:0;font-size:13px;line-height:1.45;color:var(--muted)}
+.empty{margin:auto;text-align:center;color:var(--muted);font-size:15px;line-height:1.6;max-width:320px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.card.dashed{border:2px dashed #94a3b8}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tag{font-size:12px;font-weight:800;letter-spacing:.06em;color:var(--accent-ink)}
+.tag.grey{color:#475569}
+.num{font-size:12px;font-weight:700;color:#047857}
+.num.over{color:var(--warn)}
+.txt{font-size:15px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.small{border:1px solid var(--line);background:#fff;color:#334155;font-family:inherit;font-size:13px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer;min-height:32px;align-self:flex-start}
+.small:hover{background:#f1f5f9}
+.block{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px}
+.bn{min-width:28px;height:28px;border-radius:14px;background:#dbeafe;color:var(--accent-ink);font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.bt{flex:1;font-size:15px}
+.bw{font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap}
+.edit{width:100%;min-height:96px;resize:vertical;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;font-size:15px;line-height:1.5}
+.edit.short{min-height:64px}
+.bar{background:var(--soft);border:1px solid #e2e8f0;border-radius:12px;padding:18px 28px;display:flex;gap:56px;align-items:flex-end;flex-wrap:wrap}
+.grp{display:flex;flex-direction:column;gap:10px}
+.grp span{font-size:13px;font-weight:800;letter-spacing:.08em;color:#475569}
+.btn{border:0;color:#fff;font-family:inherit;font-size:16px;font-weight:700;padding:0 22px;height:48px;border-radius:8px;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn.green{background:var(--green)} .btn.blue{background:var(--accent)} .btn.red{background:var(--red)}
+#status{min-height:20px;font-size:14px;font-weight:600;color:var(--green);text-align:center}
+@media (max-width:900px){
+  .app{padding:24px 16px}
+  .cols{grid-template-columns:1fr}
+  .bar{gap:24px}
+  h1{font-size:28px}
+  .tab{font-size:13px;padding:8px 4px}
+}
+</style>
+</head>
+<body>
+<main class="app">
+  <header>
+    <h1>Guion Multiplataforma</h1>
+    <p class="sub">Pega tu guion una vez y obtén todo listo para cada red social</p>
+  </header>
+
+  <div class="cols">
+    <section class="col">
+      <label class="lbl" for="guion">Tu guion:</label>
+      <textarea id="guion" placeholder="Pega aquí tu guion completo… (Ctrl + Enter para generar)"></textarea>
+      <div class="count" id="inCount">Palabras: 0 | Caracteres: 0</div>
+    </section>
+
+    <section class="col">
+      <div class="lbl">Resultados listos para publicar:</div>
+      <div class="tabs" role="tablist" aria-label="Formatos de salida">
+        <button class="tab" role="tab" id="tab-x" data-tab="x" aria-selected="true" aria-controls="panel">Hilo para X</button>
+        <button class="tab" role="tab" id="tab-tk" data-tab="tk" aria-selected="false" aria-controls="panel">Bloques TikTok / Reels</button>
+        <button class="tab" role="tab" id="tab-yt" data-tab="yt" aria-selected="false" aria-controls="panel">Descripción YouTube</button>
+      </div>
+      <p class="help" id="help"></p>
+      <div class="panel" id="panel" role="tabpanel"></div>
+      <div class="count" id="outCount"></div>
+    </section>
+  </div>
+
+  <div id="status" role="status" aria-live="polite"></div>
+
+  <div class="bar">
+    <div class="grp"><span>GENERAR</span><button class="btn green" id="btnGen">Generar todo</button></div>
+    <div class="grp"><span>COPIAR</span><button class="btn blue" id="btnCopy">Copiar esta pestaña</button></div>
+    <div class="grp"><span>UTILIDADES</span><button class="btn red" id="btnClear">Borrar todo</button></div>
+  </div>
+</main>
+
+<script>
+/* LOGIC START */
+const MAX_X = 280;
+const MAX_WORDS = 10;
+const HOOK_MAX = 157;
+const BODY_MAX = 1000;
+const len = s => Array.from(s).length;
+// Longitud como la cuenta X: enlaces = 23 y cada emoji = 2.
+const xlen = s => {
+  const t = s.replace(/https?:\/\/\S+/g, "x".repeat(23));
+  return Array.from(t).length + (t.match(/\p{Extended_Pictographic}/gu) || []).length;
+};
+// Cuenta palabras reales (un emoji o símbolo suelto no cuenta como palabra).
+const wc = s => { const t = s.trim(); return t ? t.split(/\s+/).filter(w => /[\p{L}\p{N}]/u.test(w)).length : 0; };
+
+// Divide el texto en oraciones. Cada salto de línea también corta.
+function toSentences(text) {
+  const out = [];
+  text.replace(/\r/g, "").split("\n").forEach(line => {
+    const t = line.replace(/[ \t ]+/g, " ").trim();
+    if (!t) return;
+    t.replace(/([.!?…]+["'”’)»\]]*)\s+/g, "$1\u0001").split("\u0001").forEach(s => {
+      s = s.trim();
+      if (s) out.push(s);
+    });
+  });
+  return out;
+}
+
+function splitClauses(s) {
+  return s.replace(/([,;:—–]+)\s+/g, "$1\u0001").split("\u0001").map(x => x.trim()).filter(Boolean);
+}
+
+function splitWords(s, budget) {
+  const pieces = [];
+  let cur = "";
+  s.split(" ").forEach(w => {
+    if (xlen(w) > budget) {
+      if (cur) { pieces.push(cur); cur = ""; }
+      const chars = Array.from(w);
+      for (let i = 0; i < chars.length; i += budget) pieces.push(chars.slice(i, i + budget).join(""));
+      return;
+    }
+    const cand = cur ? cur + " " + w : w;
+    if (xlen(cand) <= budget) cur = cand;
+    else { pieces.push(cur); cur = w; }
+  });
+  if (cur) pieces.push(cur);
+  return pieces;
+}
+
+function pack(units, budget) {
+  const out = [];
+  let cur = "";
+  units.forEach(u => {
+    const cand = cur ? cur + " " + u : u;
+    if (xlen(cand) <= budget) cur = cand;
+    else { out.push(cur); cur = u; }
+  });
+  if (cur) out.push(cur);
+  return out;
+}
+
+// Una oración que no cabe se corta primero en comas/puntos y comas; si aún no cabe, por palabras.
+function explode(sentence, budget) {
+  if (xlen(sentence) <= budget) return [sentence];
+  const units = [];
+  splitClauses(sentence).forEach(c => {
+    if (xlen(c) <= budget) units.push(c);
+    else splitWords(c, budget).forEach(p => units.push(p));
+  });
+  return pack(units, budget);
+}
+
+function buildThread(text) {
+  const s = toSentences(text);
+  if (!s.length) return [];
+  const one = pack(s.flatMap(x => explode(x, MAX_X)), MAX_X);
+  if (one.length === 1) return one;
+  let d = 1, parts;
+  for (;;) {
+    const budget = MAX_X - (2 * d + 2); // espacio para "12/15 "
+    parts = pack(s.flatMap(x => explode(x, budget)), budget);
+    const nd = String(parts.length).length;
+    if (nd <= d) break;
+    d = nd;
+  }
+  const n = parts.length;
+  return parts.map((p, i) => (i + 1) + "/" + n + " " + p);
+}
+
+function buildBlocks(text) {
+  const out = [];
+  const push = b => {
+    b = b.replace(/[,;:\s]+$/, "");
+    if (!b) return;
+    // Un bloque sin letras ni números (solo emojis) se pega al bloque anterior.
+    if (!/[\p{L}\p{N}]/u.test(b) && out.length) { out[out.length - 1] += " " + b; return; }
+    out.push(b);
+  };
+  toSentences(text).forEach(s => {
+    if (wc(s) <= MAX_WORDS) { push(s); return; }
+    let cur = [], curW = 0;
+    const flush = () => { if (cur.length) push(cur.join(" ")); cur = []; curW = 0; };
+    splitClauses(s).forEach(c => {
+      const cw = c.split(" ");
+      if (cw.length > MAX_WORDS) {
+        flush();
+        const k = Math.ceil(cw.length / MAX_WORDS);
+        const size = Math.ceil(cw.length / k);
+        for (let i = 0; i < cw.length; i += size) push(cw.slice(i, i + size).join(" "));
+        return;
+      }
+      if (curW + cw.length <= MAX_WORDS) { cur.push(c); curW += cw.length; }
+      else { flush(); cur = [c]; curW = cw.length; }
+    });
+    flush();
+  });
+  return out;
+}
+
+// Resumen extractivo: gancho = primeras oraciones; cuerpo = el resto (recortado si es muy largo).
+function buildYoutube(text) {
+  const s = toSentences(text);
+  if (!s.length) return { hook: "", body: "" };
+  let hook = s[0], i = 1;
+  if (len(hook) > HOOK_MAX) {
+    const cut = hook.slice(0, HOOK_MAX - 1);
+    hook = cut.slice(0, cut.lastIndexOf(" ") > 0 ? cut.lastIndexOf(" ") : cut.length).replace(/[,;:\s]+$/, "") + "…";
+  } else {
+    while (i < s.length && len(hook + " " + s[i]) <= HOOK_MAX) { hook += " " + s[i]; i++; }
+  }
+  let rest = s.slice(i);
+  let body = rest.join(" ");
+  if (len(body) > BODY_MAX) {
+    for (let k = 2; k < 50 && len(body) > BODY_MAX; k++) {
+      const pick = rest.filter((_, j) => j % k === 0 || j === rest.length - 1);
+      body = pick.join(" ");
+    }
+  }
+  return { hook, body };
+}
+/* LOGIC END */
+
+/* ---------- Interfaz ---------- */
+const $ = id => document.getElementById(id);
+const input = $("guion"), panel = $("panel"), outCount = $("outCount"), status = $("status");
+let tab = "x";
+let sampleOn = true;       // mientras el guion sea el de ejemplo
+const SAMPLE = "Estudiar más horas no siempre es estudiar mejor. Estos tres hábitos cambiaron mi forma de aprender, y puedes empezar hoy mismo.\n\nPrimero, estudia en bloques cortos. Veinticinco minutos de enfoque total y cinco de descanso rinden más que tres horas seguidas sin pausa.\n\nSegundo, explica lo que aprendiste con tus propias palabras. Si no puedes explicarlo fácil, todavía no lo entiendes del todo.\n\nTercero, repasa al día siguiente. Diez minutos de repaso temprano valen más que una noche entera de estudio antes del examen.";
+const HELP = {
+  x: "Tu guion dividido en publicaciones de hasta 280 caracteres, numeradas (1/2, 2/2) y sin cortar frases a la mitad. Se publican una por una como respuestas, formando un hilo.",
+  tk: "Frases cortas de máximo 10 palabras, pensadas para aparecer como texto en pantalla o subtítulos en TikTok, Reels o Shorts.",
+  yt: "Gancho y resumen listos para la descripción de tu video. Revísalos y edítalos si quieres, y agrega tus hashtags y enlaces abajo."
+};
+let data = null;           // resultados generados
+let tags = "";             // hashtags y enlaces del usuario
+try { tags = localStorage.getItem("gm_tags") || ""; } catch (e) {}
+
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+
+function say(msg) {
+  status.textContent = msg;
+  clearTimeout(say.t);
+  say.t = setTimeout(() => { status.textContent = ""; }, 2200);
+}
+
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (e) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand("copy"); } catch (e2) {}
+    document.body.removeChild(ta);
+    return ok;
+  }
+}
+
+function updateInCount() {
+  const v = input.value;
+  $("inCount").textContent = "Palabras: " + wc(v) + " | Caracteres: " + len(v);
+}
+
+function emptyState(msg) {
+  panel.replaceChildren(el("div", "empty", msg));
+  outCount.textContent = "";
+}
+
+function ytFull() {
+  const hook = $("ytHook") ? $("ytHook").value.trim() : data.yt.hook;
+  const body = $("ytBody") ? $("ytBody").value.trim() : data.yt.body;
+  return [hook, body, tags.trim()].filter(Boolean).join("\n\n");
+}
+
+function render() {
+  document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
+  $("help").textContent = HELP[tab];
+  if (!data) { emptyState("Aquí aparecerán tus resultados. Pega tu guion y pulsa «Generar todo»."); return; }
+  panel.replaceChildren();
+
+  if (tab === "x") {
+    data.thread.forEach((t, i) => {
+      const card = el("div", "card");
+      const row = el("div", "row");
+      row.append(el("span", "tag", data.thread.length > 1 ? "PARTE " + (i + 1) + "/" + data.thread.length : "TWEET ÚNICO"));
+      const n = xlen(t);
+      row.append(el("span", "num" + (n > MAX_X ? " over" : ""), n + " / " + MAX_X));
+      const btn = el("button", "small", "Copiar parte");
+      btn.addEventListener("click", async () => { btn.textContent = (await copyText(t)) ? "¡Copiado!" : "No se pudo copiar"; setTimeout(() => { btn.textContent = "Copiar parte"; }, 1500); });
+      card.append(row, el("div", "txt", t), btn);
+      panel.append(card);
+    });
+    outCount.textContent = data.thread.length + (data.thread.length === 1 ? " parte" : " partes") + " | Límite: " + MAX_X + " caracteres por parte";
+  }
+
+  if (tab === "tk") {
+    data.blocks.forEach((b, i) => {
+      const row = el("div", "block");
+      row.append(el("span", "bn", String(i + 1)), el("span", "bt", b), el("span", "bw", wc(b) + (wc(b) === 1 ? " palabra" : " palabras")));
+      panel.append(row);
+    });
+    outCount.textContent = data.blocks.length + " bloques | Máximo " + MAX_WORDS + " palabras por bloque";
+  }
+
+  if (tab === "yt") {
+    const mk = (tagText, id, value, cls, grey) => {
+      const card = el("div", "card");
+      card.append(el("span", "tag" + (grey ? " grey" : ""), tagText));
+      const ta = el("textarea", "edit " + (cls || ""));
+      ta.id = id; ta.value = value;
+      ta.setAttribute("aria-label", tagText);
+      card.append(ta);
+      return { card, ta };
+    };
+    const h = mk("GANCHO (SE VE ANTES DE «MOSTRAR MÁS»)", "ytHook", data.yt.hook, "short");
+    const b = mk("CONTENIDO RESUMIDO", "ytBody", data.yt.body);
+    const t = mk("HASHTAGS Y ENLACES", "ytTags", tags, "short", true);
+    t.card.classList.add("dashed");
+    t.ta.placeholder = "Agrega aquí tus hashtags y enlaces";
+    const upd = () => { const n = len(ytFull()); outCount.textContent = "Caracteres: " + n + " / 5000" + (n > 5000 ? " (te pasaste del límite de YouTube)" : ""); };
+    [h.ta, b.ta].forEach(x => x.addEventListener("input", upd));
+    t.ta.addEventListener("input", () => { tags = t.ta.value; try { localStorage.setItem("gm_tags", tags); } catch (e) {} upd(); });
+    panel.append(h.card, b.card, t.card);
+    upd();
+  }
+}
+
+function generate(silent) {
+  const text = input.value;
+  if (!text.trim()) { data = null; render(); say("Pega tu guion primero."); input.focus(); return; }
+  data = { thread: buildThread(text), blocks: buildBlocks(text), yt: buildYoutube(text) };
+  render();
+  if (!silent) say("¡Listo! Resultados generados.");
+}
+
+function tabText() {
+  if (!data) return "";
+  if (tab === "x") return data.thread.join("\n\n");
+  if (tab === "tk") return data.blocks.join("\n");
+  return ytFull();
+}
+
+document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => { tab = b.dataset.tab; render(); }));
+$("btnGen").addEventListener("click", () => generate());
+$("btnCopy").addEventListener("click", async () => {
+  const t = tabText();
+  if (!t) { say("Primero genera los resultados."); return; }
+  say((await copyText(t)) ? "Copiado al portapapeles." : "No se pudo copiar. Selecciona el texto y usa Ctrl + C.");
+});
+$("btnClear").addEventListener("click", () => {
+  if (input.value.trim() && !confirm("¿Borrar el guion y todos los resultados?")) return;
+  input.value = ""; data = null; updateInCount(); render(); input.focus();
+});
+input.addEventListener("input", () => { sampleOn = false; updateInCount(); });
+input.addEventListener("focus", () => { if (sampleOn) input.select(); });
+input.addEventListener("keydown", e => { if (e.ctrlKey && e.key === "Enter") generate(); });
+
+input.value = SAMPLE;
+updateInCount();
+generate(true);
+
+// Funciona sin internet una vez abierta (solo cuando se sirve desde una dirección web).
+if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+</script>
+</body>
+</html>
